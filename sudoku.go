@@ -167,14 +167,16 @@ func (s *Sudoku) Fill() {
 }
 
 // Save creates a JSON file for this board.
-func (s *Sudoku) Save() error {
+func (s *Sudoku) Save(fileName string) error {
 	sudokuJson, err := json.Marshal(s)
 
 	if err != nil {
 		return err
 	}
 
-	fileName := fmt.Sprintf("boards/sudoku-%d.json", s.Seed)
+	if fileName == "@seed" {
+		fileName = fmt.Sprintf("sudoku-%d.json", s.Seed)
+	}
 
 	// Write the file with 0644 permissions.
 	err = os.WriteFile(fileName, sudokuJson, 0644)

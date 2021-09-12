@@ -8,9 +8,12 @@ import (
 
 func main() {
 	curr := time.Now().UnixNano()
-	seedPtr := flag.Int64("seed", curr, "The seed; defaults to current ts")
+	seedPtr := flag.Int64("seed", curr, "The seed; defaults to current unix timestamp")
 	simpleOutputPtr := flag.Bool("simple", false, "Shows a board without UTF-8 borders")
+	outputPtr := flag.String("output", "", "The output path (@seed for auto naming)")
 	flag.Parse()
+
+	var err error
 
 	sudoku := Sudoku{
 		N:    9,
@@ -24,7 +27,10 @@ func main() {
 	duration := time.Since(start)
 
 	sudoku.Print(!*simpleOutputPtr)
-	err := sudoku.Save()
+
+	if *outputPtr != "" {
+		err = sudoku.Save(*outputPtr)
+	}
 
 	if err != nil {
 		fmt.Println(err)
@@ -32,6 +38,7 @@ func main() {
 
 	ms := duration.Milliseconds()
 
+	fmt.Println("Seed:", *seedPtr)
 	fmt.Print("Execution time: ")
 
 	if ms > 0 {
