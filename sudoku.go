@@ -166,6 +166,82 @@ func (s *Sudoku) Fill() {
 	}
 }
 
+// GeneratePuzzle needs to run after `Fill`. It generates a proper puzzle with some
+// indecies which are hidden.
+func (s *Sudoku) GeneratePuzzle() *Sudoku {
+	rand.Seed(s.Seed)
+
+	board := make([][]uint8, 9)
+	missing := rand.Intn(59-57) + 57
+	maxEmptyPerBox := 8
+	minEmptyPerBox := 5
+
+	for i, box := range s.Board {
+		board[i] = box.GetNumbers()
+	}
+
+	for i := 0; i < 5; i++ {
+		opposite := i
+		emptyAmount := 0
+
+		if i == 3 {
+			opposite = i + 2
+		} else {
+			opposite = 8 - i
+		}
+
+		for j := 0; j < 9; j++ {
+			if board[i][j] == 0 {
+				emptyAmount++
+				continue
+			}
+
+			if missing == 0 {
+				break
+			}
+
+			indexIsEmpty := rand.Intn(2)
+			oppositeIndex := 8 - j
+
+			if indexIsEmpty == 1 {
+				board[i][j] = 0
+				board[opposite][oppositeIndex] = 0
+				missing -= 2
+				emptyAmount++
+			}
+
+			if emptyAmount >= maxEmptyPerBox {
+				break
+			}
+		}
+
+		// If not enough cells are empty, we need to go back and empty more.
+		if emptyAmount < minEmptyPerBox {
+			i -= 1
+			continue
+		}
+
+		if missing == 0 {
+			break
+		}
+	}
+
+	puzzle := &Sudoku{
+		N:    s.N,
+		Seed: s.Seed,
+	}
+	puzzle.Init()
+
+	for i := 0; i < 9; i++ {
+		box := &Box{N: s.N}
+		box.Init()
+		box.SetNumbers(board[i])
+		puzzle.Board[i] = box
+	}
+
+	return puzzle
+}
+
 // Save creates a JSON file for this board.
 func (s *Sudoku) Save(fileName string) error {
 	sudokuJson, err := json.Marshal(s)
@@ -223,7 +299,11 @@ func (s *Sudoku) Print(showRich bool) {
 					fmt.Print(" ")
 				}
 
-				fmt.Print(v, " ", end)
+				if v != 0 {
+					fmt.Print(v, " ", end)
+				} else {
+					fmt.Print("  ", end)
+				}
 			}
 
 			fmt.Println()

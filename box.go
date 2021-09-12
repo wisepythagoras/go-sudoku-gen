@@ -77,7 +77,7 @@ func (b *Box) InsertPos(pos int, n uint8) bool {
 		return false
 	}
 
-	if b.Has(n) {
+	if n != 0 && b.Has(n) {
 		return false
 	}
 
@@ -101,6 +101,17 @@ func (b *Box) GetCol(c int) []uint8 {
 	}
 
 	return []uint8{b.numbers[c], b.numbers[c+3], b.numbers[c+6]}
+}
+
+func (b *Box) GetNumbers() []uint8 {
+	numbers := make([]uint8, 9)
+	copy(numbers, b.numbers)
+
+	return numbers
+}
+
+func (b *Box) SetNumbers(numbers []uint8) {
+	b.numbers = numbers
 }
 
 func (b *Box) Empty() {

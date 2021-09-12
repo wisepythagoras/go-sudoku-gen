@@ -15,10 +15,7 @@ func main() {
 
 	var err error
 
-	sudoku := Sudoku{
-		N:    9,
-		Seed: *seedPtr,
-	}
+	sudoku := Sudoku{Seed: *seedPtr}
 
 	sudoku.Init()
 
@@ -27,6 +24,7 @@ func main() {
 	duration := time.Since(start)
 
 	sudoku.Print(!*simpleOutputPtr)
+	sudoku.GeneratePuzzle().Print(!*simpleOutputPtr)
 
 	if *outputPtr != "" {
 		err = sudoku.Save(*outputPtr)
