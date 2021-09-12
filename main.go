@@ -21,12 +21,14 @@ func main() {
 	}
 
 	sudoku := Sudoku{
-		N:             9,
-		MissingDigits: 10,
-		Seed:          int64(seed),
+		N:    9,
+		Seed: int64(seed),
 	}
 
 	sudoku.Init()
 	sudoku.Fill()
 	sudoku.Print(true)
+	err = sudoku.Save()
+
+	fmt.Println(err)
 }

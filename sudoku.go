@@ -1,35 +1,35 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"math"
 	"math/rand"
+	"os"
 )
 
 type Sudoku struct {
 	// Figure out the logic here. Ideally we want them to add
 	// as many as they want, but currently the logic below is
 	// just for 9 (the typical).
-	N             uint8 // The number of columns and rows.
-	MissingDigits uint8 // Number of missing digits.
-	Seed          int64
-	sqrtN         uint8
-	board         []*Box
+	N     uint8  `json:"n"` // The number of columns and rows.
+	Seed  int64  `json:"seed"`
+	Board []*Box `json:"board"`
 }
 
+// Init initializes the Sudoku instance. It's required before running `Fill`.
 func (s *Sudoku) Init() {
 	s.N = 9
-	s.board = make([]*Box, s.N)
+	s.Board = make([]*Box, s.N)
 
-	for i := range s.board {
-		s.board[i] = &Box{N: s.N}
-		s.board[i].Init()
+	for i := range s.Board {
+		s.Board[i] = &Box{N: s.N}
+		s.Board[i].Init()
 	}
 
-	s.sqrtN = uint8(math.Sqrt(float64(s.N)))
 	rand.Seed(s.Seed)
 }
 
+// Fill fills the Sudoku board with numbers.
 func (s *Sudoku) Fill() {
 	history := make([]int, 0, 8)
 
@@ -48,7 +48,7 @@ func (s *Sudoku) Fill() {
 		}
 
 		if len(history) > 5 && occurances > len(history)/2 {
-			for _, box := range s.board {
+			for _, box := range s.Board {
 				box.Empty()
 			}
 
@@ -57,33 +57,33 @@ func (s *Sudoku) Fill() {
 			break
 		}
 
-		box := s.board[i]
-		s.board[i].Empty()
+		box := s.Board[i]
+		s.Board[i].Empty()
 		var boxH1 *Box
 		var boxH2 *Box
 		var boxV1 *Box
 		var boxV2 *Box
 
 		if i < 3 {
-			boxV1 = s.board[i+3]
-			boxV2 = s.board[i+6]
+			boxV1 = s.Board[i+3]
+			boxV2 = s.Board[i+6]
 		} else if i < 6 {
-			boxV1 = s.board[i-3]
-			boxV2 = s.board[i+3]
+			boxV1 = s.Board[i-3]
+			boxV2 = s.Board[i+3]
 		} else {
-			boxV1 = s.board[i-3]
-			boxV2 = s.board[i-6]
+			boxV1 = s.Board[i-3]
+			boxV2 = s.Board[i-6]
 		}
 
 		if i%3 == 0 {
-			boxH1 = s.board[i+1]
-			boxH2 = s.board[i+2]
+			boxH1 = s.Board[i+1]
+			boxH2 = s.Board[i+2]
 		} else if i%3 == 1 {
-			boxH1 = s.board[i-1]
-			boxH2 = s.board[i+1]
+			boxH1 = s.Board[i-1]
+			boxH2 = s.Board[i+1]
 		} else {
-			boxH1 = s.board[i-2]
-			boxH2 = s.board[i-1]
+			boxH1 = s.Board[i-2]
+			boxH2 = s.Board[i-1]
 		}
 
 		for j := 0; j < 9; j++ {
@@ -148,19 +148,36 @@ func (s *Sudoku) Fill() {
 	}
 }
 
-func (s *Sudoku) Save() {
-	// Save as JSON file.
+// Save creates a JSON file for this board.
+func (s *Sudoku) Save() error {
+	sudokuJson, err := json.Marshal(s)
+
+	if err != nil {
+		return err
+	}
+
+	fileName := fmt.Sprintf("boards/sudoku-%d.json", s.Seed)
+
+	// Write the file with 0644 permissions.
+	err = os.WriteFile(fileName, sudokuJson, 0644)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
+// Print displays the board in stdout.
 func (s *Sudoku) Print(showRich bool) {
 	if showRich {
 		printLine(0)
 	}
 
 	for i := 0; i < 3; i++ {
-		box1 := s.board[i*3]
-		box2 := s.board[i*3+1]
-		box3 := s.board[i*3+2]
+		box1 := s.Board[i*3]
+		box2 := s.Board[i*3+1]
+		box3 := s.Board[i*3+2]
 
 		for j := 0; j < 3; j++ {
 			row := make([]uint8, 3)

@@ -1,3 +1,4 @@
-boards
+boards.txt
 go-sudoku-gen
 gen.sh
+boards/*.json

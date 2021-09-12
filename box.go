@@ -1,5 +1,9 @@
 package main
 
+import (
+	"fmt"
+)
+
 type Box struct {
 	N          uint8
 	numbers    []uint8
@@ -101,4 +105,20 @@ func (b *Box) GetCol(c int) []uint8 {
 
 func (b *Box) Empty() {
 	b.Init()
+}
+
+func (b *Box) MarshalJSON() ([]byte, error) {
+	array := "["
+
+	for i, v := range b.numbers {
+		if i == 0 {
+			array = fmt.Sprintf("%s%d", array, v)
+		} else {
+			array = fmt.Sprintf("%s,%d", array, v)
+		}
+	}
+
+	array = array + "]"
+
+	return []byte(array), nil
 }
