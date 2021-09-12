@@ -46,7 +46,7 @@ func (s *Sudoku) Fill() {
 				occurances++
 			}
 		}
-		// fmt.Println(occurances, history)
+
 		if len(history) > 5 && occurances > len(history)/2 {
 			for _, box := range s.board {
 				box.Empty()
@@ -85,8 +85,6 @@ func (s *Sudoku) Fill() {
 			boxH1 = s.board[i-2]
 			boxH2 = s.board[i-1]
 		}
-
-		// fmt.Println("Box", i, history)
 
 		for j := 0; j < 9; j++ {
 			row := make([]uint8, 9)
@@ -150,8 +148,14 @@ func (s *Sudoku) Fill() {
 	}
 }
 
-func (s *Sudoku) Print() {
-	printLine(0)
+func (s *Sudoku) Save() {
+	// Save as JSON file.
+}
+
+func (s *Sudoku) Print(showRich bool) {
+	if showRich {
+		printLine(0)
+	}
 
 	for i := 0; i < 3; i++ {
 		box1 := s.board[i*3]
@@ -165,27 +169,37 @@ func (s *Sudoku) Print() {
 			row = append(row, box2.GetRow(j)...)
 			row = append(row, box3.GetRow(j)...)
 
-			fmt.Print("\xe2\x95\x91")
+			if showRich {
+				fmt.Print("\xe2\x95\x91")
+			}
 
 			for k, v := range row {
-				end := "\xe2\x94\x82"
+				end := ""
 
-				if (k-2)%3 == 0 {
-					end = "\xe2\x95\x91"
+				if showRich {
+					end = "\xe2\x94\x82"
+
+					if (k-2)%3 == 0 {
+						end = "\xe2\x95\x91"
+					}
+
+					fmt.Print(" ")
 				}
 
-				fmt.Print(" ", v, " ", end)
+				fmt.Print(v, " ", end)
 			}
 
 			fmt.Println()
 
-			if i != 2 || (i == 2 && j < 2) {
+			if showRich && (i != 2 || (i == 2 && j < 2)) {
 				printLine(j + 3)
 			}
 		}
 	}
 
-	printLine(9)
+	if showRich {
+		printLine(9)
+	}
 }
 
 func printLine(i int) {

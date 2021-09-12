@@ -28,5 +28,5 @@ func main() {
 
 	sudoku.Init()
 	sudoku.Fill()
-	sudoku.Print()
+	sudoku.Print(true)
 }
