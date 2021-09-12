@@ -17,9 +17,25 @@ func main() {
 	}
 
 	sudoku.Init()
+
+	start := time.Now()
 	sudoku.Fill()
+	duration := time.Since(start)
+
 	sudoku.Print(true)
 	err := sudoku.Save()
 
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	ms := duration.Milliseconds()
+
+	fmt.Print("Execution time: ")
+
+	if ms > 0 {
+		fmt.Printf("%dms\n", ms)
+	} else {
+		fmt.Printf("0.%dms\n", duration.Microseconds())
+	}
 }
