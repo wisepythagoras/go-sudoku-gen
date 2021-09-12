@@ -9,6 +9,7 @@ import (
 func main() {
 	curr := time.Now().UnixNano()
 	seedPtr := flag.Int64("seed", curr, "The seed; defaults to current ts")
+	simpleOutputPtr := flag.Bool("simple", false, "Shows a board without UTF-8 borders")
 	flag.Parse()
 
 	sudoku := Sudoku{
@@ -22,7 +23,7 @@ func main() {
 	sudoku.Fill()
 	duration := time.Since(start)
 
-	sudoku.Print(true)
+	sudoku.Print(!*simpleOutputPtr)
 	err := sudoku.Save()
 
 	if err != nil {
