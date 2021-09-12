@@ -1,34 +1,25 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"os"
-	"strconv"
+	"time"
 )
 
 func main() {
-	args := os.Args[1:]
-
-	if len(args) == 0 {
-		return
-	}
-
-	seed, err := strconv.Atoi(args[0])
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	curr := time.Now().UnixNano()
+	seedPtr := flag.Int64("seed", curr, "The seed; defaults to current ts")
+	flag.Parse()
 
 	sudoku := Sudoku{
 		N:    9,
-		Seed: int64(seed),
+		Seed: *seedPtr,
 	}
 
 	sudoku.Init()
 	sudoku.Fill()
 	sudoku.Print(true)
-	err = sudoku.Save()
+	err := sudoku.Save()
 
 	fmt.Println(err)
 }
