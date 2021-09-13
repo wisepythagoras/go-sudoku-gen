@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"time"
+
+	"github.com/wisepythagoras/go-sudoku-gen/sudoku"
 )
 
 func main() {
@@ -15,7 +17,7 @@ func main() {
 
 	var err error
 
-	sudoku := Sudoku{Seed: *seedPtr}
+	sudoku := sudoku.Sudoku{Seed: *seedPtr}
 
 	sudoku.Init()
 
