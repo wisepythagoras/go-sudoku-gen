@@ -319,6 +319,15 @@ func (s *Sudoku) Print(showRich bool) {
 	}
 }
 
+// GetBox returns a box in a specific position.
+func (s *Sudoku) GetBox(idx int) *Box {
+	if idx >= 9 {
+		return nil
+	}
+
+	return s.Board[idx]
+}
+
 func printLine(i int) {
 	if i == 0 {
 		fmt.Print("\xe2\x95\x94")

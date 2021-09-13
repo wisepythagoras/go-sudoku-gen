@@ -2,6 +2,20 @@
 
 This little program, which has no external dependencies, is a quite fast procedural [Sudoku](https://en.wikipedia.org/wiki/Sudoku) puzzle generator.
 
+## Usage
+
+```
+Usage of ./go-sudoku-gen:
+  -output string
+        The output path (@seed for auto naming)
+  -save-img
+        Whether to save the image or not
+  -seed int
+        The seed; defaults to current unix timestamp (default 1631573683595299425)
+  -simple
+        Shows a board without UTF-8 borders
+```
+
 ## Sample output
 
 ``` sh
@@ -50,3 +64,9 @@ This little program, which has no external dependencies, is a quite fast procedu
 Seed: 674195711
 Execution time: 5ms
 ```
+
+## Generating a printable board
+
+You only need to supply the `-save-img` flag. The result looks like this:
+
+![Sudoku puzzle](sample/sudoku-5418964721.png "Sudoku puzzle")
