@@ -25,6 +25,8 @@ func main() {
 	saveImgPtr := flag.Bool("save-img", false, "Whether to save the image or not")
 	flag.Parse()
 
+	fmt.Println("Seed:", *seedPtr)
+
 	var err error
 
 	sudoku := sudoku.Sudoku{Seed: *seedPtr}
@@ -49,7 +51,6 @@ func main() {
 
 	ms := duration.Milliseconds()
 
-	fmt.Println("Seed:", *seedPtr)
 	fmt.Print("Execution time: ")
 
 	if ms > 0 {

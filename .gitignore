@@ -2,3 +2,5 @@ boards.txt
 go-sudoku-gen
 gen.sh
 boards/*.json
+sudoku-*.png
+sudoku-*.json
