@@ -196,12 +196,7 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	for i := 0; i < 5; i++ {
 		opposite := i
 		emptyAmount := 0
-
-		if i == 3 {
-			opposite = i + 2
-		} else {
-			opposite = 8 - i
-		}
+		opposite = 8 - i
 
 		// We'll need to loop through the board beforehand, because there may
 		// already be empty slots and we need to count them.
@@ -212,7 +207,9 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 		}
 
 		for j := 0; j < 9; j++ {
-			if emptyAmount >= maxEmptyPerBox || missing == 0 {
+			if emptyAmount >= maxEmptyPerBox ||
+				totalRemoved >= missingBackup+2 ||
+				missing == 0 {
 				break
 			}
 
@@ -229,14 +226,8 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 				board[opposite][oppositeIndex] = 0
 				emptyAmount++
 				numMap[board[i][j]] = available - 1
-
-				if i < 4 {
-					missing -= 2
-					totalRemoved += 2
-				} else {
-					missing--
-					totalRemoved++
-				}
+				missing -= 2
+				totalRemoved += 2
 			}
 		}
 
