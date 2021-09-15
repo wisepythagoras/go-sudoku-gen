@@ -176,6 +176,17 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	maxEmptyPerBox := 8
 	minEmptyPerBox := 5
 
+	numMap := make(map[uint8]int)
+	numMap[1] = 9
+	numMap[2] = 9
+	numMap[3] = 9
+	numMap[4] = 9
+	numMap[5] = 9
+	numMap[6] = 9
+	numMap[7] = 9
+	numMap[8] = 9
+	numMap[9] = 9
+
 	for i, box := range s.Board {
 		board[i] = box.GetNumbers()
 	}
@@ -200,14 +211,16 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 				break
 			}
 
-			indexIsEmpty := rand.Intn(2)
+			shouldEmpty := rand.Intn(2) == 1
+			available := numMap[board[i][j]]
 			oppositeIndex := 8 - j
 
-			if indexIsEmpty == 1 {
+			if shouldEmpty && available >= 2 {
 				board[i][j] = 0
 				board[opposite][oppositeIndex] = 0
 				missing -= 2
 				emptyAmount++
+				numMap[board[i][j]] = available - 1
 			}
 
 			if emptyAmount >= maxEmptyPerBox {
