@@ -231,6 +231,11 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 		// If not enough cells are empty, we need to go back and empty more.
 		if emptyAmount < minEmptyPerBox {
 			i -= 1
+
+			if missing == 0 {
+				missing = 1
+			}
+
 			continue
 		}
 
