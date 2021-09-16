@@ -220,14 +220,31 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 			shouldEmpty := rand.Intn(2) == 1
 			available := numMap[board[i][j]]
 			oppositeIndex := 8 - j
+			oppositeAvailable := numMap[board[opposite][oppositeIndex]]
 
-			if shouldEmpty && available >= 2 {
-				board[i][j] = 0
-				board[opposite][oppositeIndex] = 0
+			if (board[opposite][oppositeIndex] == board[i][j] &&
+				available <= 2) ||
+				oppositeAvailable < 2 {
+				continue
+			}
+
+			// To avoid not having one or more numbers in the board, we make sure that there
+			// are more than 2 available.
+			if shouldEmpty && available > 2 {
 				emptyAmount++
-				numMap[board[i][j]] = available - 1
 				missing -= 2
 				totalRemoved += 2
+
+				if board[opposite][oppositeIndex] == board[i][j] {
+					available -= 1
+				} else {
+					numMap[board[opposite][oppositeIndex]] = oppositeAvailable - 1
+				}
+
+				numMap[board[i][j]] = available - 1
+
+				board[i][j] = 0
+				board[opposite][oppositeIndex] = 0
 			}
 		}
 
@@ -248,6 +265,8 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 			continue
 		}
 
+		// If we're on the 4th box and we've used up all the missing number slots,
+		// we should give it the option to eliminate 2 more numbers.
 		if missing == 0 && i == 3 {
 			missing = 1
 		}
