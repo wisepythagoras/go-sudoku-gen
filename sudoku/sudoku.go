@@ -168,6 +168,7 @@ func (s *Sudoku) Fill() {
 
 // GeneratePuzzle needs to run after `Fill`. It generates a proper puzzle with some
 // indecies which are hidden.
+// TODO: Start from scratch.
 func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	rand.Seed(s.Seed)
 
@@ -228,9 +229,14 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 				continue
 			}
 
+			if !shouldEmpty {
+				continue
+			}
+
 			// To avoid not having one or more numbers in the board, we make sure that there
 			// are more than 2 available.
-			if shouldEmpty && available > 2 {
+			if (i == 4 && available > 2 && emptyAmount < maxEmptyPerBox-2) ||
+				i != 4 && available >= 2 {
 				if i == 4 && j != 4 {
 					emptyAmount += 2
 				} else {
