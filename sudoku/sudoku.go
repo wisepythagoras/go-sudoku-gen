@@ -231,9 +231,19 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 			// To avoid not having one or more numbers in the board, we make sure that there
 			// are more than 2 available.
 			if shouldEmpty && available > 2 {
-				emptyAmount++
-				missing -= 2
-				totalRemoved += 2
+				if i == 4 && j != 4 {
+					emptyAmount += 2
+				} else {
+					emptyAmount++
+				}
+
+				if i == 4 && j == 4 {
+					missing--
+					totalRemoved++
+				} else {
+					missing -= 2
+					totalRemoved += 2
+				}
 
 				if board[opposite][oppositeIndex] == board[i][j] {
 					available -= 1
