@@ -61,13 +61,21 @@ func (b *Box) Insert(c, r, n uint8) bool {
 		return false
 	}
 
-	if b.Has(n) {
+	if n != 0 && b.Has(n) {
 		return false
 	}
 
 	pos := c + r*3
+
+	if _, ok := b.numbersMap[b.numbers[pos]]; ok {
+		delete(b.numbersMap, b.numbers[pos])
+	}
+
 	b.numbers[pos] = n
-	b.numbersMap[n] = pos
+
+	if n != 0 {
+		b.numbersMap[n] = pos
+	}
 
 	return true
 }
@@ -79,6 +87,10 @@ func (b *Box) InsertPos(pos int, n uint8) bool {
 
 	if n != 0 && b.Has(n) {
 		return false
+	}
+
+	if _, ok := b.numbersMap[b.numbers[pos]]; ok {
+		delete(b.numbersMap, b.numbers[pos])
 	}
 
 	b.numbers[pos] = n
@@ -112,6 +124,10 @@ func (b *Box) GetNumbers() []uint8 {
 
 func (b *Box) SetNumbers(numbers []uint8) {
 	b.numbers = numbers
+
+	for i, num := range numbers {
+		b.numbersMap[num] = uint8(i)
+	}
 }
 
 func (b *Box) Empty() {

@@ -14,11 +14,13 @@ type Sudoku struct {
 	N     uint8  `json:"n"` // The number of columns and rows.
 	Seed  int64  `json:"seed"`
 	Board []*Box `json:"board"`
+	count int64
 }
 
 // Init initializes the Sudoku instance. It's required before running `Fill`.
 func (s *Sudoku) Init() {
 	s.N = 9
+	s.count = 0
 	s.Board = make([]*Box, s.N)
 
 	for i := range s.Board {
@@ -145,7 +147,7 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	const maxEmptyPerBox = 8
 	const minEmptyPerBox = 5
 
-	rand.Seed(s.Seed)
+	rand.Seed(s.Seed + s.count)
 
 	board := make([][]uint8, 9)
 	totalRemoved := 0
@@ -267,7 +269,122 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 		puzzle.Board[i] = box
 	}
 
+	solvedPuzzle := &Sudoku{}
+	solvedPuzzle.Copy(puzzle)
+
+	if solvedPuzzle.Solve() {
+		// solvedPuzzle.Print(true)
+		// fmt.Println(solvedPuzzle.GetCounter())
+	} else {
+		s.count += 1
+		return s.GeneratePuzzle()
+	}
+
 	return puzzle
+}
+
+// GetCounter returns the number of itterations on the specific board.
+func (s *Sudoku) GetCounter() int64 {
+	return s.count
+}
+
+// GetRow returns all the numbers in a specific row.
+func (s *Sudoku) GetRow(row int) []uint8 {
+	numbers := make([]uint8, 0)
+	boxIdx := 2
+
+	if row < 3 {
+		boxIdx = 0
+	} else if row < 6 {
+		boxIdx = 1
+	}
+
+	for i := boxIdx * 3; i < boxIdx*3+3; i++ {
+		numbers = append(numbers, s.Board[i].GetRow(row%3)...)
+	}
+
+	return numbers
+}
+
+// GetCol gets all the numbers in a given column.
+func (s *Sudoku) GetCol(col int) []uint8 {
+	numbers := make([]uint8, 0)
+	boxIdx := 2
+
+	if col < 3 {
+		boxIdx = 0
+	} else if col < 6 {
+		boxIdx = 1
+	}
+
+	for i := 0 + boxIdx; i <= 6+boxIdx; i += 3 {
+		numbers = append(numbers, s.Board[i].GetCol(col%3)...)
+	}
+
+	return numbers
+}
+
+// GetBoxFromRowCol returns the box from a specific point in the board.
+func (s *Sudoku) GetBoxFromRowCol(row int, col int) *Box {
+	boxRow := 2
+	boxCol := 2
+
+	if row < 3 {
+		boxRow = 0
+	} else if row < 6 {
+		boxRow = 1
+	}
+
+	if col < 3 {
+		boxCol = 0
+	} else if col < 6 {
+		boxCol = 1
+	}
+
+	return s.Board[(boxRow*3)+boxCol]
+}
+
+// Solve tries to solve the puzzle.
+func (s *Sudoku) Solve() bool {
+	for i := 0; i < 9; i++ {
+		row := s.GetRow(i)
+
+		for j, num := range row {
+			if num != 0 {
+				continue
+			}
+
+			column := s.GetCol(j)
+			box := s.GetBoxFromRowCol(i, j)
+			possibilites := getVHPossibilities(row, column, box)
+
+			for _, possibility := range possibilites {
+				box.Insert(uint8(j%3), uint8(i%3), possibility)
+
+				if s.Solve() {
+					return true
+				} else {
+					box.Insert(uint8(j%3), uint8(i%3), 0)
+				}
+			}
+
+			return false
+		}
+	}
+
+	return true
+}
+
+// Copy copies a sudoku board into this instance.
+func (s *Sudoku) Copy(board *Sudoku) {
+	s.Init()
+
+	for i, box := range board.Board {
+		s.Board[i].SetNumbers(box.GetNumbers())
+	}
+
+	s.N = board.N
+	s.Seed = board.Seed
 }
 
 // Save creates a JSON file for this board.
@@ -410,4 +527,49 @@ func printLine(i int) {
 	}
 
 	fmt.Println()
+}
+
+// getVHPossibilities gets the vertical and horizontal possibilities.
+func getVHPossibilities(row, col []uint8, box *Box) []uint8 {
+	possibilites := make([]uint8, 0)
+
+	for i := 1; i <= 9; i++ {
+		if box.Has(uint8(i)) {
+			continue
+		}
+
+		found := false
+
+		for _, num := range row {
+			if num == 0 {
+				continue
+			}
+
+			if num == uint8(i) {
+				found = true
+				break
+			}
+		}
+
+		if found {
+			continue
+		}
+
+		for _, num := range col {
+			if num == 0 {
+				continue
+			}
+
+			if num == uint8(i) {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			possibilites = append(possibilites, uint8(i))
+		}
+	}
+
+	return possibilites
 }
