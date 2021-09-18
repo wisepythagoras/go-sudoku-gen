@@ -273,14 +273,35 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	solvedPuzzle.Copy(puzzle)
 
 	if solvedPuzzle.Solve() {
+		if !solvedPuzzle.IsEqual(s) {
+			s.count++
+			return s.GeneratePuzzle()
+		}
+
 		// solvedPuzzle.Print(true)
-		// fmt.Println(solvedPuzzle.GetCounter())
+		// fmt.Println(s.GetCounter())
 	} else {
-		s.count += 1
+		s.count++
 		return s.GeneratePuzzle()
 	}
 
 	return puzzle
+}
+
+// IsEqual checks whether two Sudoku boards are equal.
+func (s *Sudoku) IsEqual(sudoku *Sudoku) bool {
+	for i, box := range s.Board {
+		selfNumbers := box.GetNumbers()
+		otherNumbers := sudoku.Board[i].GetNumbers()
+
+		for j, num := range selfNumbers {
+			if num != otherNumbers[j] {
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 // GetCounter returns the number of itterations on the specific board.

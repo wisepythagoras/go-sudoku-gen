@@ -25,32 +25,6 @@ func main() {
 	saveImgPtr := flag.Bool("save-img", false, "Whether to save the image or not")
 	flag.Parse()
 
-	// Test
-	/*s := sudoku.Sudoku{}
-	s.Init()
-
-	var arr [][]uint8 = [][]uint8{
-		{7, 0, 2, 0, 0, 0, 1, 0, 0},
-		{0, 5, 0, 0, 0, 3, 0, 0, 9},
-		{6, 0, 0, 0, 0, 0, 5, 0, 0},
-		{8, 0, 0, 0, 4, 3, 0, 9, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 9, 0, 7, 5, 0, 0, 0, 8},
-		{0, 0, 9, 0, 0, 0, 0, 0, 7},
-		{7, 0, 0, 2, 0, 0, 0, 4, 0},
-		{0, 0, 5, 0, 0, 0, 2, 0, 3},
-	}
-
-	for i, numbers := range arr {
-		s.Board[i].SetNumbers(numbers)
-	}
-
-	s.Print(true)
-	fmt.Println(s.Solve())
-	s.Print(true)
-	os.Exit(9)*/
-	// End test
-
 	fmt.Println("Seed:", *seedPtr)
 
 	var err error
