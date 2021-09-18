@@ -35,10 +35,10 @@ func main() {
 
 	start := time.Now()
 	sudoku.Fill()
+	puzzle := sudoku.GeneratePuzzle()
 	duration := time.Since(start)
 
 	sudoku.Print(!*simpleOutputPtr)
-	puzzle := sudoku.GeneratePuzzle()
 	puzzle.Print(!*simpleOutputPtr)
 
 	if *outputPtr != "" {

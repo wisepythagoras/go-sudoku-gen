@@ -207,7 +207,7 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 
 			// To avoid not having one or more numbers in the board, we make sure that there
 			// are more than 2 available.
-			if (i == 4 && available > 2 && emptyAmount < maxEmptyPerBox-2) ||
+			if (i == 4 && available > 2 && emptyAmount <= maxEmptyPerBox) ||
 				i != 4 && available >= 2 {
 				if i == 4 && j != 4 {
 					emptyAmount += 2
@@ -277,9 +277,6 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 			s.count++
 			return s.GeneratePuzzle()
 		}
-
-		// solvedPuzzle.Print(true)
-		// fmt.Println(s.GetCounter())
 	} else {
 		s.count++
 		return s.GeneratePuzzle()
