@@ -170,14 +170,14 @@ func (s *Sudoku) Fill() {
 // indecies which are hidden.
 // TODO: Start from scratch.
 func (s *Sudoku) GeneratePuzzle() *Sudoku {
+	const targetMissing = 58
+	const maxEmptyPerBox = 8
+	const minEmptyPerBox = 5
+
 	rand.Seed(s.Seed)
 
 	board := make([][]uint8, 9)
-	missing := rand.Intn(59-57) + 57
-	missingBackup := missing
 	totalRemoved := 0
-	maxEmptyPerBox := 8
-	minEmptyPerBox := 5
 
 	numMap := make(map[uint8]int)
 	numMap[1] = 9
@@ -209,8 +209,7 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 
 		for j := 0; j < 9; j++ {
 			if emptyAmount >= maxEmptyPerBox ||
-				totalRemoved >= missingBackup+2 ||
-				missing == 0 {
+				totalRemoved >= targetMissing+2 {
 				break
 			}
 
@@ -244,10 +243,8 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 				}
 
 				if i == 4 && j == 4 {
-					missing--
 					totalRemoved++
 				} else {
-					missing -= 2
 					totalRemoved += 2
 				}
 
@@ -267,27 +264,21 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 		// If not enough cells are empty, we need to go back and empty more.
 		if emptyAmount < minEmptyPerBox {
 			// Do not exceed the max numbers to remove by more than 2.
-			if totalRemoved >= missingBackup+2 {
+			if totalRemoved >= targetMissing+2 {
 				break
 			}
 
 			// Otherwise, we should return the the block and remove more numbers.
 			i--
 
-			if missing == 0 {
-				missing = 1
-			}
-
 			continue
 		}
 
 		// If we're on the 4th box and we've used up all the missing number slots,
 		// we should give it the option to eliminate 2 more numbers.
-		if missing == 0 && i == 3 {
-			missing = 1
-		}
-
-		if missing == 0 {
+		if totalRemoved == targetMissing && i == 2 {
+			continue
+		} else if totalRemoved >= targetMissing {
 			break
 		}
 	}
