@@ -31,36 +31,7 @@ func (s *Sudoku) Init() {
 
 // Fill fills the Sudoku board with numbers.
 func (s *Sudoku) Fill() {
-	history := make([]int, 0, 8)
-
 	for i := 0; i <= 8; i++ {
-		if len(history) > 8 {
-			history = history[1:]
-		}
-
-		history = append(history, i)
-		occurances := 0
-
-		// Count the number of times the current box index has been processed in the past
-		// few loops.
-		for _, v := range history {
-			if v == i {
-				occurances++
-			}
-		}
-
-		// If the current board composition has been lead into an infinite loop, we want
-		// to empty the current board and start over.
-		if len(history) > 5 && occurances > len(history)/2 {
-			for _, box := range s.Board {
-				box.Empty()
-			}
-
-			i = 0
-			s.Fill()
-			break
-		}
-
 		box := s.Board[i]
 
 		// Empty a box before it's processed.
@@ -149,13 +120,13 @@ func (s *Sudoku) Fill() {
 			// by resetting the entire board and starting again, without resetting the
 			// seed that was used.
 			if len(possible) == 0 {
-				if i <= 2 {
-					i = 0
-				} else {
-					i -= 2
+				for _, box := range s.Board {
+					box.Empty()
 				}
 
-				break
+				i = 0
+				s.Fill()
+				return
 			}
 
 			// Get a random number from all the possibilities and insert it in the target
