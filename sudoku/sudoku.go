@@ -376,6 +376,10 @@ func (s *Sudoku) Solve() bool {
 			box := s.GetBoxFromRowCol(i, j)
 			possibilites := getVHPossibilities(row, column, box)
 
+			if i == int(s.N-1) && j == int(s.N-2) && len(possibilites) > 1 {
+				return false
+			}
+
 			for _, possibility := range possibilites {
 				box.Insert(uint8(j%3), uint8(i%3), possibility)
 
