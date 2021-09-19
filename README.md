@@ -16,6 +16,16 @@ Usage of ./go-sudoku-gen:
         Shows a board without UTF-8 borders
 ```
 
+## How it works
+
+### Generating valid boards
+
+The board is created and filled by randomizing the number that goes in each cell. If a point is reached where it runs out of possible placements, then it attempts to re-fill the board from scratch.
+
+### Generating a puzzle
+
+In order to generate a valid puzzle, the algorithm randomly chooses which cells to empty. At the end, it will verify that there is only one possible solution, otherwise it will attempt to re-generate a puzzle.
+
 ## Sample output
 
 ``` sh
@@ -69,4 +79,4 @@ Execution time: 5ms
 
 You only need to supply the `-save-img` flag. The result looks like this:
 
-![Sudoku puzzle](sample/sudoku-5418964721.png "Sudoku puzzle")
+![Sudoku puzzle](sample/sudoku-1034875.png "Sudoku puzzle")

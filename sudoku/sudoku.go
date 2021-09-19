@@ -144,14 +144,28 @@ func (s *Sudoku) Fill() {
 // TODO: Start from scratch.
 func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	const targetMissing = 58
-	const maxEmptyPerBox = 8
-	const minEmptyPerBox = 5
+	const maxEmptyPerBox = 9
+	const minEmptyPerBox = 6
 
 	rand.Seed(s.Seed + s.count)
 
+	// This will hold the raw values of our board.
 	board := make([][]uint8, 9)
+
+	// Get all the numbers of our board into the array.
+	for i, box := range s.Board {
+		board[i] = box.GetNumbers()
+	}
+
+	// This variable will count the number of cells we empty out.
 	totalRemoved := 0
 
+	// This variable will hold the number of iterations per block. Ideally, we want to let this function
+	// to have a go on the block a couple of times before moving on to the next block.
+	iterations := 0
+
+	// In order for a puzzle to be valid, it needs to to have all numbers present, otherwise it's likely
+	// a puzzle will be unsolvable.
 	numMap := make(map[uint8]int)
 	numMap[1] = 9
 	numMap[2] = 9
@@ -163,14 +177,9 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	numMap[8] = 9
 	numMap[9] = 9
 
-	for i, box := range s.Board {
-		board[i] = box.GetNumbers()
-	}
-
 	for i := 0; i < 5; i++ {
-		opposite := i
 		emptyAmount := 0
-		opposite = 8 - i
+		opposite := 8 - i
 
 		// We'll need to loop through the board beforehand, because there may
 		// already be empty slots and we need to count them.
@@ -181,8 +190,13 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 		}
 
 		for j := 0; j < 9; j++ {
+			if j == 8 {
+				iterations++
+			}
+
 			if emptyAmount >= maxEmptyPerBox ||
-				totalRemoved >= targetMissing+2 {
+				totalRemoved >= targetMissing+2 ||
+				iterations > 1 {
 				break
 			}
 
@@ -207,8 +221,8 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 
 			// To avoid not having one or more numbers in the board, we make sure that there
 			// are more than 2 available.
-			if (i == 4 && available > 2 && emptyAmount <= maxEmptyPerBox) ||
-				i != 4 && available >= 2 {
+			if (i == 4 && available >= 2 && emptyAmount <= maxEmptyPerBox) ||
+				i != 4 && available >= 0 {
 				if i == 4 && j != 4 {
 					emptyAmount += 2
 				} else {
@@ -221,21 +235,24 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 					totalRemoved += 2
 				}
 
-				if board[opposite][oppositeIndex] == board[i][j] {
-					available -= 1
-				} else {
-					numMap[board[opposite][oppositeIndex]] = oppositeAvailable - 1
-				}
-
-				numMap[board[i][j]] = available - 1
+				backup := board[i][j]
+				backupOpposite := board[opposite][oppositeIndex]
 
 				board[i][j] = 0
 				board[opposite][oppositeIndex] = 0
+
+				if backupOpposite == backup {
+					available--
+				} else {
+					numMap[backupOpposite] = oppositeAvailable - 1
+				}
+
+				numMap[backup] = available - 1
 			}
 		}
 
 		// If not enough cells are empty, we need to go back and empty more.
-		if emptyAmount < minEmptyPerBox {
+		if iterations <= 1 && emptyAmount < minEmptyPerBox {
 			// Do not exceed the max numbers to remove by more than 2.
 			if totalRemoved >= targetMissing+2 {
 				break
@@ -246,6 +263,9 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 
 			continue
 		}
+
+		// Reset the iterations counter, since we're moving on to the next box.
+		iterations = 0
 
 		// If we're on the 4th box and we've used up all the missing number slots,
 		// we should give it the option to eliminate 2 more numbers.
@@ -272,14 +292,7 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	solvedPuzzle := &Sudoku{}
 	solvedPuzzle.Copy(puzzle)
 
-	if solvedPuzzle.Solve() {
-		hasMultipleSolutions := puzzle.HasMultipleSolutions()
-
-		if !solvedPuzzle.IsEqual(s) || hasMultipleSolutions {
-			s.count++
-			return s.GeneratePuzzle()
-		}
-	} else {
+	if puzzle.HasMultipleSolutions() {
 		s.count++
 		return s.GeneratePuzzle()
 	}
@@ -364,7 +377,7 @@ func (s *Sudoku) GetBoxFromRowCol(row int, col int) *Box {
 	return s.Board[(boxRow*3)+boxCol]
 }
 
-// Solve tries to solve the puzzle.
+// Solve tries to solve the puzzle and returns the first possible solution.
 func (s *Sudoku) Solve() bool {
 	for i := 0; i < 9; i++ {
 		row := s.GetRow(i)
@@ -377,10 +390,6 @@ func (s *Sudoku) Solve() bool {
 			column := s.GetCol(j)
 			box := s.GetBoxFromRowCol(i, j)
 			possibilites := getVHPossibilities(row, column, box)
-
-			if i == int(s.N-1) && j == int(s.N-2) && len(possibilites) > 1 {
-				return false
-			}
 
 			for _, possibility := range possibilites {
 				box.Insert(uint8(j%3), uint8(i%3), possibility)
@@ -427,6 +436,8 @@ func (s *Sudoku) HasMultipleSolutions() bool {
 	return s.internalCount(sudoku, 0, int64(sudoku.CountEmpty()), true) > 1
 }
 
+// internalCount will loop through all possible combinations and count the number of solutions it finds.
+// By supplying true to `breakIfMultiple` it will break if it finds more than one solutions.
 func (s *Sudoku) internalCount(sudoku *Sudoku, count, totalEmpty int64, breakIfMultiple bool) int64 {
 	// If we've filled all of the initially empty slots, we increment the counter.
 	if totalEmpty == 0 {
