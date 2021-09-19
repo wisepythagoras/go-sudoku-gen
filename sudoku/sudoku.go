@@ -273,7 +273,9 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	solvedPuzzle.Copy(puzzle)
 
 	if solvedPuzzle.Solve() {
-		if !solvedPuzzle.IsEqual(s) {
+		hasMultipleSolutions := puzzle.HasMultipleSolutions()
+
+		if !solvedPuzzle.IsEqual(s) || hasMultipleSolutions {
 			s.count++
 			return s.GeneratePuzzle()
 		}
@@ -395,6 +397,75 @@ func (s *Sudoku) Solve() bool {
 	}
 
 	return true
+}
+
+// CountEmpty returns the total number of empty cells in the puzzle.
+func (s *Sudoku) CountEmpty() int {
+	count := 0
+
+	for _, box := range s.Board {
+		count += box.CountEmpty()
+	}
+
+	return count
+}
+
+// CountSolutions returns the total amount of solutions for this board.
+func (s *Sudoku) CountSolutions() int64 {
+	sudoku := &Sudoku{}
+	sudoku.Copy(s)
+
+	return s.internalCount(sudoku, 0, int64(sudoku.CountEmpty()), false)
+}
+
+// HasMultipleSolutions returns true if there are multiple solutions, or false if there
+// is only one.
+func (s *Sudoku) HasMultipleSolutions() bool {
+	sudoku := &Sudoku{}
+	sudoku.Copy(s)
+
+	return s.internalCount(sudoku, 0, int64(sudoku.CountEmpty()), true) > 1
+}
+
+func (s *Sudoku) internalCount(sudoku *Sudoku, count, totalEmpty int64, breakIfMultiple bool) int64 {
+	// If we've filled all of the initially empty slots, we increment the counter.
+	if totalEmpty == 0 {
+		count++
+	}
+
+	if breakIfMultiple && count > 1 {
+		return count
+	}
+
+	for i := 0; i < 9; i++ {
+		row := sudoku.GetRow(i)
+
+		for j, num := range row {
+			if num != 0 {
+				continue
+			}
+
+			column := sudoku.GetCol(j)
+			box := sudoku.GetBoxFromRowCol(i, j)
+			possibilites := getVHPossibilities(row, column, box)
+
+			// Recursively run through all of the possibilities and try to fill in all of
+			// the empty cells.
+			for _, possibility := range possibilites {
+				box.Insert(uint8(j%3), uint8(i%3), possibility)
+				count = s.internalCount(sudoku, count, totalEmpty-1, breakIfMultiple)
+				box.Insert(uint8(j%3), uint8(i%3), 0)
+
+				if breakIfMultiple && count > 1 {
+					return count
+				}
+			}
+
+			return count
+		}
+	}
+
+	return count
 }
 
 // Copy copies a sudoku board into this instance.

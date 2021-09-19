@@ -122,6 +122,18 @@ func (b *Box) GetNumbers() []uint8 {
 	return numbers
 }
 
+func (b *Box) CountEmpty() int {
+	count := 0
+
+	for _, n := range b.numbers {
+		if n == 0 {
+			count++
+		}
+	}
+
+	return count
+}
+
 func (b *Box) SetNumbers(numbers []uint8) {
 	b.numbers = numbers
 
