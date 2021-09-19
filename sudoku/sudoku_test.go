@@ -29,4 +29,8 @@ func TestSudokuSolve(t *testing.T) {
 	if !s.Solve() {
 		t.Error("Unable to solve sudoku")
 	}
+
+	if s.CountSolutions() != 1 {
+		t.Error("The board is supposed to have only one solution")
+	}
 }
