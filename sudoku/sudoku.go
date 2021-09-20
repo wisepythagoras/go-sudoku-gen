@@ -145,7 +145,7 @@ func (s *Sudoku) Fill() {
 func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	const targetMissing = 58
 	const maxEmptyPerBox = 9
-	const minEmptyPerBox = 6
+	const minEmptyPerBox = 4
 
 	rand.Seed(s.Seed + s.count)
 
@@ -160,10 +160,6 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	// This variable will count the number of cells we empty out.
 	totalRemoved := 0
 
-	// This variable will hold the number of iterations per block. Ideally, we want to let this function
-	// to have a go on the block a couple of times before moving on to the next block.
-	iterations := 0
-
 	// In order for a puzzle to be valid, it needs to to have all numbers present, otherwise it's likely
 	// a puzzle will be unsolvable.
 	numMap := make(map[uint8]int)
@@ -177,104 +173,89 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	numMap[8] = 9
 	numMap[9] = 9
 
-	for i := 0; i < 5; i++ {
-		emptyAmount := 0
+	for i, box := range s.Board {
+		board[i] = box.GetNumbers()
+	}
+
+	for i := 0; i < 4; i++ {
 		opposite := 8 - i
 
-		// We'll need to loop through the board beforehand, because there may
-		// already be empty slots and we need to count them.
-		for j := 0; j < 9; j++ {
-			if board[i][j] == 0 {
-				emptyAmount++
-			}
-		}
+		amountToEmpty := rand.Intn(maxEmptyPerBox-minEmptyPerBox) + minEmptyPerBox
 
-		for j := 0; j < 9; j++ {
-			if j == 8 {
-				iterations++
-			}
+		for j := amountToEmpty; j > 0; {
+			index := rand.Intn(9)
 
-			if emptyAmount >= maxEmptyPerBox ||
-				totalRemoved >= targetMissing+2 ||
-				iterations > 1 {
-				break
-			}
-
-			if board[i][j] == 0 {
+			if board[i][index] == 0 {
 				continue
 			}
 
-			shouldEmpty := rand.Intn(2) == 1
-			available := numMap[board[i][j]]
-			oppositeIndex := 8 - j
+			available := numMap[board[i][index]]
+			oppositeIndex := 8 - index
 			oppositeAvailable := numMap[board[opposite][oppositeIndex]]
 
-			if (board[opposite][oppositeIndex] == board[i][j] &&
-				available <= 2) ||
+			if (board[opposite][oppositeIndex] == board[i][index] &&
+				available < 2) ||
 				oppositeAvailable < 2 {
 				continue
 			}
 
-			if !shouldEmpty {
-				continue
+			totalRemoved += 2
+
+			if board[opposite][oppositeIndex] == board[i][index] {
+				available -= 1
+			} else {
+				numMap[board[opposite][oppositeIndex]] = oppositeAvailable - 1
 			}
 
-			// To avoid not having one or more numbers in the board, we make sure that there
-			// are more than 2 available.
-			if (i == 4 && available >= 2 && emptyAmount <= maxEmptyPerBox) ||
-				i != 4 && available >= 0 {
-				if i == 4 && j != 4 {
-					emptyAmount += 2
-				} else {
-					emptyAmount++
-				}
+			numMap[board[i][index]] = available - 1
 
-				if i == 4 && j == 4 {
-					totalRemoved++
-				} else {
-					totalRemoved += 2
-				}
+			board[i][index] = 0
+			board[opposite][oppositeIndex] = 0
 
-				backup := board[i][j]
-				backupOpposite := board[opposite][oppositeIndex]
-
-				board[i][j] = 0
-				board[opposite][oppositeIndex] = 0
-
-				if backupOpposite == backup {
-					available--
-				} else {
-					numMap[backupOpposite] = oppositeAvailable - 1
-				}
-
-				numMap[backup] = available - 1
-			}
-		}
-
-		// If not enough cells are empty, we need to go back and empty more.
-		if iterations <= 1 && emptyAmount < minEmptyPerBox {
-			// Do not exceed the max numbers to remove by more than 2.
-			if totalRemoved >= targetMissing+2 {
-				break
-			}
-
-			// Otherwise, we should return the the block and remove more numbers.
-			i--
-
-			continue
-		}
-
-		// Reset the iterations counter, since we're moving on to the next box.
-		iterations = 0
-
-		// If we're on the 4th box and we've used up all the missing number slots,
-		// we should give it the option to eliminate 2 more numbers.
-		if totalRemoved == targetMissing && i == 2 {
-			continue
-		} else if totalRemoved >= targetMissing {
-			break
+			j--
 		}
 	}
+
+	// For the fifth box (the center one).
+	for j := 0; j < 4; j++ {
+		shouldEmpty := rand.Intn(4) >= 1
+
+		if !shouldEmpty {
+			continue
+		}
+
+		available := numMap[board[4][j]]
+		oppositeIndex := 8 - j
+		oppositeAvailable := numMap[board[4][oppositeIndex]]
+
+		if (board[4][oppositeIndex] == board[4][j] &&
+			available < 2) ||
+			oppositeAvailable < 2 {
+			continue
+		}
+
+		if j == 4 {
+			totalRemoved++
+		} else {
+			totalRemoved += 2
+		}
+
+		if board[4][oppositeIndex] == board[4][j] {
+			available -= 1
+		} else {
+			numMap[board[4][oppositeIndex]] = oppositeAvailable - 1
+		}
+
+		numMap[board[4][j]] = available - 1
+
+		board[4][j] = 0
+		board[4][oppositeIndex] = 0
+	}
+
+	// if totalRemoved < targetMissing-4 {
+	// 	s.count++
+	// 	return s.GeneratePuzzle()
+	// }
 
 	puzzle := &Sudoku{
 		N:    s.N,
