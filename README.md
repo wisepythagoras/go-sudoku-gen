@@ -79,4 +79,4 @@ Execution time: 342ms
 
 You only need to supply the `-save-img` flag. The result looks like this:
 
-![Sudoku puzzle](sample/sudoku-1034875.png "Sudoku puzzle")
+![Sudoku puzzle](sample/sudoku.png "Sudoku puzzle")
