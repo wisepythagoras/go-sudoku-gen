@@ -144,7 +144,7 @@ func (s *Sudoku) Fill() {
 // TODO: Start from scratch.
 func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	const targetMissing = 58
-	const maxEmptyPerBox = 9
+	const maxEmptyPerBox = 8
 	const minEmptyPerBox = 4
 
 	rand.Seed(s.Seed + s.count)
@@ -160,8 +160,8 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	// This variable will count the number of cells we empty out.
 	totalRemoved := 0
 
-	// In order for a puzzle to be valid, it needs to to have all numbers present, otherwise it's likely
-	// a puzzle will be unsolvable.
+	// In order for a puzzle to be valid, it needs to to have all numbers present, otherwise
+	// it's likely a puzzle will be unsolvable.
 	numMap := make(map[uint8]int)
 	numMap[1] = 9
 	numMap[2] = 9
@@ -252,11 +252,6 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 		board[4][oppositeIndex] = 0
 	}
 
-	// if totalRemoved < targetMissing-4 {
-	// 	s.count++
-	// 	return s.GeneratePuzzle()
-	// }
-
 	puzzle := &Sudoku{
 		N:    s.N,
 		Seed: s.Seed,
@@ -278,7 +273,81 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 		return s.GeneratePuzzle()
 	}
 
+	// Harden the puzzle.
+	puzzle.Harden()
+
 	return puzzle
+}
+
+// Harden itterates over the existing puzzle (after calling `GeneratePuzzle`), or board (after
+// calling `Fill` - albeit the results would not be that great) and empties cells randomly
+// until it gets the hardest solvable puzzle only with one solution. This algorithm implements
+// backtracking, similar to `Solve`, but it empties cells until it's reached a difficulty that
+// we want.
+func (s *Sudoku) Harden() {
+	rand.Seed(int64(s.N + 1))
+
+	const targetMin = 13
+	const targetMax = 15
+
+	prevNonEmpty := 45
+	count := 0
+
+	for {
+		// Harden the puzzle.
+		s.harden(rand.Int63())
+
+		nonEmpty := 45 - s.CountEmpty()
+
+		// We want the function to exit if the non empty cells are less or equal to 15, or
+		// if we've iterated over the board 5 times and it could not be hardened any more.
+		if nonEmpty <= 15 || (prevNonEmpty == nonEmpty && count > 5) {
+			return
+		}
+
+		prevNonEmpty = nonEmpty
+
+		if prevNonEmpty == nonEmpty {
+			count++
+		} else {
+			count = 0
+		}
+	}
+}
+
+func (s *Sudoku) harden(count int64) {
+	rand.Seed(s.Seed + count)
+
+	for i := 0; i < 5; i++ {
+		box := s.Board[i]
+
+		for j, num := range box.GetNumbers() {
+			if num == 0 {
+				continue
+			}
+
+			shouldEmpty := rand.Intn(2) == 1
+
+			if shouldEmpty {
+				oppositeIndex := 8 - j
+				oppositeBox := s.Board[8-i]
+
+				backup := num
+				oppositeBackup := oppositeBox.GetPos(oppositeIndex)
+
+				box.InsertPos(j, 0)
+				oppositeBox.InsertPos(oppositeIndex, 0)
+
+				if !s.HasMultipleSolutions() {
+					s.harden(count + 1)
+					return
+				}
+
+				box.InsertPos(j, backup)
+				oppositeBox.InsertPos(oppositeIndex, oppositeBackup)
+			}
+		}
+	}
 }
 
 // IsEqual checks whether two Sudoku boards are equal.

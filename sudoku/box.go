@@ -56,6 +56,14 @@ func (b *Box) ColHas(c, n uint8) bool {
 	return false
 }
 
+func (b *Box) GetPos(i int) uint8 {
+	if i >= int(b.N) || i < 0 {
+		return 0
+	}
+
+	return b.numbers[i]
+}
+
 func (b *Box) Insert(c, r, n uint8) bool {
 	if c >= b.N/3 || r >= b.N/3 || n > b.N {
 		return false
