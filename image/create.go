@@ -66,16 +66,16 @@ func CreateImage(puzzle *sudoku.Sudoku) (*image.RGBA, error) {
 func drawGrid(img *image.RGBA) {
 	draw.Draw(img, img.Bounds(), &image.Uniform{color.White}, image.ZP, draw.Src)
 
-	drawRectangle(img, color.Black, 9, 9, 1020, 1020, 6)
-	drawRectangle(img, color.Black, 346, 9, 346, 1020, 3)
-	drawRectangle(img, color.Black, 680, 9, 680, 1020, 3)
-	drawRectangle(img, color.Black, 9, 346, 1020, 346, 3)
-	drawRectangle(img, color.Black, 9, 680, 1020, 680, 3)
+	drawRectangle(img, color.Black, 5, 5, 1025, 1025, 10)
+	drawRectangle(img, color.Black, 344, 9, 344, 1020, 5)
+	drawRectangle(img, color.Black, 678, 9, 678, 1020, 5)
+	drawRectangle(img, color.Black, 9, 344, 1020, 344, 5)
+	drawRectangle(img, color.Black, 9, 678, 1020, 678, 5)
 
 	for i := 0; i < 9; i++ {
-		pos := 10 + 111*(i+1) + i
-		drawRectangle(img, color.Black, pos, 10, pos, 1020, 1)
-		drawRectangle(img, color.Black, 10, pos, 1020, pos, 1)
+		pos := 10 + 111*(i+1) + i - 1
+		drawRectangle(img, color.Black, pos, 10, pos, 1020, 2)
+		drawRectangle(img, color.Black, 10, pos, 1020, pos, 2)
 	}
 }
 
