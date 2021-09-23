@@ -15,7 +15,7 @@ import (
 
 // Create the image for a Sudoku puzzle.
 func CreateImage(puzzle *sudoku.Sudoku) (*image.RGBA, error) {
-	img := image.NewRGBA(image.Rect(0, 0, 1029, 1029))
+	img := image.NewRGBA(image.Rect(0, 0, 1031, 1031))
 
 	drawGrid(img)
 
