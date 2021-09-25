@@ -30,6 +30,8 @@ func main() {
 	start := time.Now()
 	sudoku.Fill()
 	puzzle := sudoku.GeneratePuzzle()
+
+	// Here we measure the time it took to run the sudokugeneration algorithm.
 	duration := time.Since(start)
 
 	sudoku.Print(!*simpleOutputPtr)

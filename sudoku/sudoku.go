@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// Sudoku defines the structure of the entire Sudoku board.
 type Sudoku struct {
 	// Figure out the logic here. Ideally we want them to add
 	// as many as they want, but currently the logic below is
