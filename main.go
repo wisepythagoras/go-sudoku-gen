@@ -56,7 +56,7 @@ func main() {
 	}
 
 	if *saveImgPtr {
-		err = createImage(puzzle)
+		err = createAndSaveImage(puzzle)
 
 		if err != nil {
 			fmt.Println(err)
@@ -66,7 +66,7 @@ func main() {
 	}
 }
 
-func createImage(puzzle *sudoku.Sudoku) error {
+func createAndSaveImage(puzzle *sudoku.Sudoku) error {
 	img, _ := image.CreateImage(puzzle)
 
 	fileName := fmt.Sprintf("sudoku-%d.png", puzzle.Seed)
