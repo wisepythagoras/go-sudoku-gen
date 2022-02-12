@@ -23,11 +23,19 @@ func main() {
 	var err error
 
 	if *solvePtr != "" {
-		_, err := sudoku.ParseBoard(*solvePtr)
+		board, err := sudoku.ParseBoard(*solvePtr)
 
 		if err != nil {
 			fmt.Println(err)
 		}
+
+		board.Print(true)
+
+		numOfSolutions := board.CountSolutions()
+		board.Solve()
+		board.Print(true)
+
+		fmt.Println("Possible solutions:", numOfSolutions)
 
 		return
 	}

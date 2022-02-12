@@ -714,15 +714,7 @@ func ParseBoard(boardStr string) (*Sudoku, error) {
 		}
 	}
 
-	board.Print(true)
-
-	numOfSolutions := board.CountSolutions()
-	board.Solve()
-	board.Print(true)
-
-	fmt.Println("Possible solutions:", numOfSolutions)
-
-	return nil, nil
+	return board, nil
 }
 
 // getVHPossibilities gets the vertical and horizontal possibilities.
