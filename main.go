@@ -17,28 +17,38 @@ func main() {
 	simpleOutputPtr := flag.Bool("simple", false, "Shows a board without UTF-8 borders")
 	outputPtr := flag.String("output", "", "The output path (@seed for auto naming)")
 	saveImgPtr := flag.Bool("save-img", false, "Whether to save the image or not")
+	solvePtr := flag.String("solve", "", "A puzzle to solve")
 	flag.Parse()
-
-	fmt.Println("Seed:", *seedPtr)
 
 	var err error
 
-	sudoku := sudoku.Sudoku{Seed: *seedPtr}
+	if *solvePtr != "" {
+		_, err := sudoku.ParseBoard(*solvePtr)
 
-	sudoku.Init()
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		return
+	}
+
+	fmt.Println("Seed:", *seedPtr)
+
+	board := sudoku.Sudoku{Seed: *seedPtr}
+	board.Init()
 
 	start := time.Now()
-	sudoku.Fill()
-	puzzle := sudoku.GeneratePuzzle()
+	board.Fill()
+	puzzle := board.GeneratePuzzle()
 
 	// Here we measure the time it took to run the sudokugeneration algorithm.
 	duration := time.Since(start)
 
-	sudoku.Print(!*simpleOutputPtr)
+	board.Print(!*simpleOutputPtr)
 	puzzle.Print(!*simpleOutputPtr)
 
 	if *outputPtr != "" {
-		err = sudoku.Save(*outputPtr)
+		err = board.Save(*outputPtr)
 	}
 
 	if err != nil {

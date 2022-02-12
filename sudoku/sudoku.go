@@ -2,9 +2,11 @@ package sudoku
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
+	"strconv"
 )
 
 // Sudoku defines the structure of the entire Sudoku board.
@@ -682,6 +684,45 @@ func printLine(i int) {
 	}
 
 	fmt.Println()
+}
+
+// ParseBoard parses a valid sudoku board. Empty slots are represented with a ".". Slots are
+// printed from the first 3x3 grid all the way to the last one.
+// [1] [2] [3]
+// [4] [5] [6]
+// [7] [8] [9]
+// And the numbers within each 3x3 box are placed in the same order as the 3x3 boxes.
+func ParseBoard(boardStr string) (*Sudoku, error) {
+	board := &Sudoku{}
+	board.Init()
+
+	for i, c := range boardStr {
+		boxIdx := (i / 9)
+		box := board.GetBox(boxIdx)
+
+		if c != '.' {
+			num, err := strconv.Atoi(string(c))
+
+			if err != nil {
+				return nil, errors.New(fmt.Sprintf("Invalid character \"%c\" at index %d", c, i))
+			}
+
+			if !box.InsertPos(i-(boxIdx*9), uint8(num)) {
+				errStr := fmt.Sprintf("Unable to insert \"%c\" at index %d (box: %d, box position: )", c, i, boxIdx)
+				return nil, errors.New(errStr)
+			}
+		}
+	}
+
+	board.Print(true)
+
+	numOfSolutions := board.CountSolutions()
+	board.Solve()
+	board.Print(true)
+
+	fmt.Println("Possible solutions:", numOfSolutions)
+
+	return nil, nil
 }
 
 // getVHPossibilities gets the vertical and horizontal possibilities.
