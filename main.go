@@ -31,6 +31,16 @@ func main() {
 
 		board.Print(true)
 
+		if *saveImgPtr {
+			err = createAndSaveImage(board)
+
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println("Saved the printable image of the sudoku puzzle")
+			}
+		}
+
 		numOfSolutions := board.CountSolutions()
 		board.Solve()
 		board.Print(true)
