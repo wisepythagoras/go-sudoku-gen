@@ -97,11 +97,11 @@ func drawRectangle(img draw.Image, color color.Color, x1, y1, x2, y2, thickness 
 
 func addLabel(img *image.RGBA, x, y int, label string) {
 	col := color.RGBA{0, 0, 0, 255}
-	point := fixed.Point26_6{fixed.Int26_6(x * 64), fixed.Int26_6(y * 64)}
+	point := fixed.Point26_6{fixed.Int26_6((x - 4) * 64), fixed.Int26_6((y + 4) * 64)}
 
 	myFont, _ := opentype.Parse(goregular.TTF)
 	fontFace, _ := opentype.NewFace(myFont, &opentype.FaceOptions{
-		Size: 12,
+		Size: 16,
 		DPI:  300.,
 	})
 
