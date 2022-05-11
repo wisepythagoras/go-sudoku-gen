@@ -17,6 +17,7 @@ func main() {
 	simpleOutputPtr := flag.Bool("simple", false, "Shows a board without UTF-8 borders")
 	outputPtr := flag.String("output", "", "The output path (@seed for auto naming)")
 	saveImgPtr := flag.Bool("save-img", false, "Whether to save the image or not")
+	saveSolutionImgPtr := flag.Bool("save-solution-img", false, "Whether to save the image of the solution or not")
 	solvePtr := flag.String("solve", "", "A puzzle to solve")
 	flag.Parse()
 
@@ -32,12 +33,20 @@ func main() {
 		board.Print(true)
 
 		if *saveImgPtr {
-			err = createAndSaveImage(board)
+			err = createAndSaveImage(board, false)
 
 			if err != nil {
 				fmt.Println(err)
 			} else {
 				fmt.Println("Saved the printable image of the sudoku puzzle")
+			}
+		}
+
+		if *saveSolutionImgPtr {
+			err = createAndSaveImage(board, true)
+
+			if err != nil {
+				fmt.Println(err)
 			}
 		}
 
@@ -84,7 +93,7 @@ func main() {
 	}
 
 	if *saveImgPtr {
-		err = createAndSaveImage(puzzle)
+		err = createAndSaveImage(puzzle, false)
 
 		if err != nil {
 			fmt.Println(err)
@@ -92,12 +101,25 @@ func main() {
 			fmt.Println("Saved the printable image of the sudoku puzzle")
 		}
 	}
+
+	if *saveSolutionImgPtr {
+		err = createAndSaveImage(&board, true)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
 }
 
-func createAndSaveImage(puzzle *sudoku.Sudoku) error {
+func createAndSaveImage(puzzle *sudoku.Sudoku, isSolution bool) error {
 	img, _ := image.CreateImage(puzzle)
+	label := ""
 
-	fileName := fmt.Sprintf("sudoku-%d.png", puzzle.Seed)
+	if isSolution {
+		label = "solution-"
+	}
+
+	fileName := fmt.Sprintf("sudoku-%s%d.png", label, puzzle.Seed)
 	f, err := os.Create(fileName)
 
 	if err != nil {
