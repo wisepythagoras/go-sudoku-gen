@@ -630,6 +630,25 @@ func (s *Sudoku) GetBox(idx int) *Box {
 	return s.Board[idx]
 }
 
+// String returns a string representation of the sudoku board.
+func (s *Sudoku) String() string {
+	str := ""
+
+	for _, b := range s.Board {
+		for _, j := range b.GetNumbers() {
+			char := "."
+
+			if j > 0 {
+				char = strconv.Itoa(int(j))
+			}
+
+			str = fmt.Sprintf("%s%s", str, char)
+		}
+	}
+
+	return str
+}
+
 func printLine(i int) {
 	if i == 0 {
 		fmt.Print("\xe2\x95\x94")

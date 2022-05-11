@@ -84,6 +84,9 @@ func main() {
 
 	ms := duration.Milliseconds()
 
+	fmt.Println("Puzzle string:")
+	fmt.Println(puzzle.String())
+
 	fmt.Print("Execution time: ")
 
 	if ms > 0 {
