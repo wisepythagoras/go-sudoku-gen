@@ -130,3 +130,7 @@ It's possible to solve a puzzle that's passed in as a string. Simply pass the st
 ╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝
 Possible solutions: 1
 ```
+
+## License
+
+Although the source code is licensed under GNU GPLv3, I prohibit the use of this code for the purpsoses of training any kind of AI model. This applies to any version of the source code and/or commit, historic, current, and/or new.

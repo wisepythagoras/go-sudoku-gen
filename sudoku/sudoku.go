@@ -18,6 +18,7 @@ type Sudoku struct {
 	Seed  int64  `json:"seed"`
 	Board []*Box `json:"board"`
 	count int64
+	rand  *rand.Rand
 }
 
 // Init initializes the Sudoku instance. It's required before running `Fill`.
@@ -31,7 +32,7 @@ func (s *Sudoku) Init() {
 		s.Board[i].Init()
 	}
 
-	rand.Seed(s.Seed)
+	s.rand = rand.New(rand.NewSource(s.Seed))
 }
 
 // Fill fills the Sudoku board with numbers.
@@ -136,7 +137,7 @@ func (s *Sudoku) Fill() {
 
 			// Get a random number from all the possibilities and insert it in the target
 			// position of the current box.
-			num := possible[rand.Intn(len(possible))]
+			num := possible[s.rand.Intn(len(possible))]
 			box.InsertPos(j, num)
 		}
 	}
@@ -146,11 +147,10 @@ func (s *Sudoku) Fill() {
 // indecies which are hidden.
 // TODO: Start from scratch.
 func (s *Sudoku) GeneratePuzzle() *Sudoku {
-	const targetMissing = 58
 	const maxEmptyPerBox = 8
 	const minEmptyPerBox = 4
 
-	rand.Seed(s.Seed + s.count)
+	s.rand = rand.New(rand.NewSource(s.Seed + s.count))
 
 	// This will hold the raw values of our board.
 	board := make([][]uint8, 9)
@@ -183,10 +183,10 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 	for i := 0; i < 4; i++ {
 		opposite := 8 - i
 
-		amountToEmpty := rand.Intn(maxEmptyPerBox-minEmptyPerBox) + minEmptyPerBox
+		amountToEmpty := s.rand.Intn(maxEmptyPerBox-minEmptyPerBox) + minEmptyPerBox
 
 		for j := amountToEmpty; j > 0; {
-			index := rand.Intn(9)
+			index := s.rand.Intn(9)
 
 			if board[i][index] == 0 {
 				continue
@@ -221,7 +221,7 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 
 	// For the fifth box (the center one).
 	for j := 0; j < 4; j++ {
-		shouldEmpty := rand.Intn(4) >= 1
+		shouldEmpty := s.rand.Intn(4) >= 1
 
 		if !shouldEmpty {
 			continue
@@ -288,17 +288,14 @@ func (s *Sudoku) GeneratePuzzle() *Sudoku {
 // backtracking, similar to `Solve`, but it empties cells until it's reached a difficulty that
 // we want.
 func (s *Sudoku) Harden() {
-	rand.Seed(int64(s.N + 1))
-
-	const targetMin = 13
-	const targetMax = 15
+	s.rand = rand.New(rand.NewSource(int64(s.N + 1)))
 
 	prevNonEmpty := 45
 	count := 0
 
 	for {
 		// Harden the puzzle.
-		s.harden(rand.Int63())
+		s.harden(s.rand.Int63())
 
 		nonEmpty := 45 - s.CountEmpty()
 
@@ -319,7 +316,7 @@ func (s *Sudoku) Harden() {
 }
 
 func (s *Sudoku) harden(count int64) {
-	rand.Seed(s.Seed + count)
+	s.rand = rand.New(rand.NewSource(s.Seed + count))
 
 	for i := 0; i < 5; i++ {
 		box := s.Board[i]
@@ -329,7 +326,7 @@ func (s *Sudoku) harden(count int64) {
 				continue
 			}
 
-			shouldEmpty := rand.Intn(2) == 1
+			shouldEmpty := s.rand.Intn(2) == 1
 
 			if shouldEmpty {
 				oppositeIndex := 8 - j
@@ -723,7 +720,7 @@ func ParseBoard(boardStr string) (*Sudoku, error) {
 			num, err := strconv.Atoi(string(c))
 
 			if err != nil {
-				return nil, errors.New(fmt.Sprintf("Invalid character \"%c\" at index %d", c, i))
+				return nil, fmt.Errorf("invalid character \"%c\" at index %d", c, i)
 			}
 
 			if !box.InsertPos(i-(boxIdx*9), uint8(num)) {
